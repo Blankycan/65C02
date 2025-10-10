@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(Emu65C02 LANGUAGES CXX VERSION 0.1.0)
+project(65C02 LANGUAGES CXX VERSION 0.1.0)
+
+# Generate compile_commands.json for IntelliSense
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ==============================
 #   Global Compiler Settings
@@ -21,23 +24,19 @@ endif()
 # ==============================
 #   Emulator Library
 # ==============================
-add_library(emu65c02
-    src/main.cpp
-    # src/cpu/Cpu65C02.cpp
-    # src/cpu/InstructionSet.cpp
-    # src/bus/Bus.cpp
-    # src/bus/Memory.cpp
+add_library(65C02_lib STATIC
+    src/cpu.cpp
 )
-target_include_directories(emu65c02 PUBLIC src)
+target_include_directories(65C02_lib PUBLIC src)
 
 # ==============================
 #   Executable
 # ==============================
 add_executable(65C02 src/main.cpp)
-target_link_libraries(65C02 PRIVATE emu65c02)
+target_link_libraries(65C02 PRIVATE 65C02_lib)
 
 # ==============================
 #   Tests
 # ==============================
-# enable_testing()
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(tests)
