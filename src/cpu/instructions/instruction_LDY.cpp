@@ -6,6 +6,7 @@ InstructionLDY::InstructionLDY():
   InstructionHandler({
     Instruction::LDY_IMM,
     Instruction::LDY_ZP,
+    Instruction::LDY_ZPX,
     Instruction::LDY_ABS
   }) {}
 
@@ -17,6 +18,15 @@ void InstructionLDY::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
       break;
     case Instruction::LDY_ZP: {
       uint8_t zeroPageAddress = cpu.fetch(memory);
+      cpu.Y = memory.read(zeroPageAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadYRegister();
+      break;
+    }
+    case Instruction::LDY_ZPX: {
+      uint8_t zeroPageAddress = cpu.fetch(memory);
+      zeroPageAddress += cpu.X;
+      cpu.cycles++;
       cpu.Y = memory.read(zeroPageAddress);
       cpu.cycles++;
       cpu.updateStatusRegisterAfterLoadYRegister();

@@ -6,6 +6,7 @@ InstructionLDA::InstructionLDA():
   InstructionHandler({
     Instruction::LDA_IMM,
     Instruction::LDA_ZP,
+    Instruction::LDA_ZPX,
     Instruction::LDA_ABS
   }) {}
 
@@ -17,6 +18,15 @@ void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
       break;
     case Instruction::LDA_ZP: {
       uint8_t zeroPageAddress = cpu.fetch(memory);
+      cpu.A = memory.read(zeroPageAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_ZPX: {
+      uint8_t zeroPageAddress = cpu.fetch(memory);
+      zeroPageAddress += cpu.X;
+      cpu.cycles++;
       cpu.A = memory.read(zeroPageAddress);
       cpu.cycles++;
       cpu.updateStatusRegisterAfterLoadAccumulator();
