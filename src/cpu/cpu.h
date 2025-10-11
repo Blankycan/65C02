@@ -1,4 +1,5 @@
 #pragma once
+#include "memory/memory_512Kb.h"
 #include <cstdint>
 
 struct StatusFlags {
@@ -27,6 +28,9 @@ public:
   ~CPU();
 
   void reset();
+  void updateStatusRegisterAfterLoadAccumulator();
+  uint8_t fetch(Memory512Kb& memory);
+  int32_t execute(Memory512Kb& memory, uint32_t cyclesToExecute);
 
   uint16_t pc;          // Program Counter
   uint16_t addressBus;  // Address Bus
@@ -40,7 +44,10 @@ public:
 
   // Status Register (from 7 [highest] to 0 [lowest]): NV-BDIZC
   union {
+    // NV-BDIZC
     uint8_t value;
     StatusFlags flags;
   } sr;
+
+  uint32_t cycles;      // Cycles that have been executed since last reset
 };
