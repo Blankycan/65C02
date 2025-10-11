@@ -10,6 +10,7 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(65C02_tests
   test_cpu.cpp
+  test_memory_512Kb.cpp
 )
 target_link_libraries(65C02_tests
   PRIVATE

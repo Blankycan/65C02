@@ -8,5 +8,6 @@
         "*.h": "cpp",
         "*.cpp": "cpp",
         "*.hpp": "cpp"
-    }
+    },
+    "editor.inlayHints.enabled": "off"
 }

@@ -26,6 +26,7 @@ endif()
 # ==============================
 add_library(65C02_lib STATIC
     src/cpu.cpp
+    src/memory_512Kb.cpp
 )
 target_include_directories(65C02_lib PUBLIC src)
 

@@ -2,19 +2,18 @@
 #include "../src/cpu.h"
 
 TEST_CASE("CPU reset", "[cpu]") {
+  // CPU start off with a reset
   CPU cpu;
-  cpu.reset();
   REQUIRE(cpu.a == 0);
   REQUIRE(cpu.x == 0);
   REQUIRE(cpu.y == 0);
   REQUIRE(cpu.pc == 0xFFFC);
   REQUIRE(cpu.sp == 0x00);
-  REQUIRE(cpu.sr.value == 0);
+  REQUIRE(cpu.sr.value == 0b00100000);
 }
 
 TEST_CASE("Test all bits in the status register", "[cpu]") {
   CPU cpu;
-  cpu.reset();
   REQUIRE(cpu.sr.value == 0b00100000);
 
   cpu.sr.flags.C = 1;
