@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include "../cpu/instructions.h"
 
 /**
  64KB memory for the 65C02, which means 2^16 addresses/words of 8-bit data (So 512Kbit of data).
@@ -17,6 +18,7 @@ class Memory512Kb {
 
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t value);
+    void write(uint16_t address, Instruction value);
 
     static constexpr size_t MEMORY_SIZE = 1 << 16; // 64KB
     uint8_t memory[MEMORY_SIZE]; // 64KB

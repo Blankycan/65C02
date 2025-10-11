@@ -5,7 +5,9 @@
 
 CPU::CPU() {
   instructionHandlers.push_back(new InstructionLDA());
-  reset();
+  PC = 0xFFFC;
+  SP = 0xFF;
+  cycles = 0;
 }
 
 CPU::~CPU() {
@@ -15,27 +17,22 @@ CPU::~CPU() {
   instructionHandlers.clear();
 }
 
-void CPU::reset() {
-  pc = 0xFFFC;
-  sp = 0x00;
-  a = 0;
-  x = 0;
-  y = 0;
-  sr.value = 0b00100000;
-  updateStatusRegisterAfterLoadAccumulator();
+void CPU::reset(Memory512Kb& memory) {
+  PC = memory.read(0xFFFC) | memory.read(0xFFFD) << 8;
+  // Store PCH on Stack, 0x01FF
+  // Store PCL on Stack, 0x01FE
+  // Store P on Stack, 0x01FD
+  SP = 0xFC;
+  A = 0;
+  X = 0;
+  Y = 0;
+  P.value = 0b00100000;
   cycles = 0;
 }
 
-void CPU::updateStatusRegisterAfterLoadAccumulator() {
-  // Set zero flag if accumulator is zero
-  sr.flags.Z = (a == 0);
-  // Set negative flag if accumulator is negative
-  sr.flags.N = (a & 0x80) ? 1 : 0;
-}
-
 uint8_t CPU::fetch(Memory512Kb& memory) {
-  uint8_t opcode = memory.read(pc);
-  pc++;
+  uint8_t opcode = memory.read(PC);
+  PC++;
   cycles++;
   return opcode;
 }
@@ -61,4 +58,11 @@ int32_t CPU::execute(Memory512Kb& memory, uint32_t cyclesToExecute) {
     }
   }
   return int32_t(cycles - cyclesStartAt) - cyclesToExecute;
+}
+
+void CPU::updateStatusRegisterAfterLoadAccumulator() {
+  // Set zero flag if accumulator is zero
+  P.flags.Z = (A == 0);
+  // Set negative flag if accumulator is negative
+  P.flags.N = (A & 0x80) ? 1 : 0;
 }

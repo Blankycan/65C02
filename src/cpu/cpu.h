@@ -29,27 +29,28 @@ public:
   CPU();
   ~CPU();
 
-  void reset();
-  void updateStatusRegisterAfterLoadAccumulator();
+  void reset(Memory512Kb& memory);
   uint8_t fetch(Memory512Kb& memory);
   int32_t execute(Memory512Kb& memory, uint32_t cyclesToExecute);
 
-  uint16_t pc;          // Program Counter
+  void updateStatusRegisterAfterLoadAccumulator();
+
+  uint16_t PC;          // Program Counter
   uint16_t addressBus;  // Address Bus
 
   uint8_t dataBus;      // Data Bus
-  uint8_t sp;           // Stack Pointer (256 byte stack located between 0x0100 and 0x01FF)
+  uint8_t SP;           // Stack Pointer (256 byte stack located between 0x0100 and 0x01FF)
   // Registers
-  uint8_t a;            // Accumulator
-  uint8_t x;            // X Register
-  uint8_t y;            // Y Register
+  uint8_t A;            // Accumulator
+  uint8_t X;            // X Register
+  uint8_t Y;            // Y Register
 
   // Status Register (from 7 [highest] to 0 [lowest]): NV-BDIZC
   union {
     // NV-BDIZC
     uint8_t value;
     StatusFlags flags;
-  } sr;
+  } P;
 
   std::vector<InstructionHandler*> instructionHandlers;
   uint32_t cycles;      // Cycles that have been executed since last reset

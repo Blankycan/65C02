@@ -14,3 +14,6 @@ uint8_t Memory512Kb::read(uint16_t address) {
 void Memory512Kb::write(uint16_t address, uint8_t value) {
   memory[address] = value;
 }
+void Memory512Kb::write(uint16_t address, Instruction value) {
+  memory[address] = static_cast<uint8_t>(value);
+}

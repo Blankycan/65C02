@@ -1,6 +1,8 @@
 #pragma once
 #include "./instruction_handler.h"
 
+class CPU;
+
 class InstructionLDA : public InstructionHandler {
   public:
     InstructionLDA();
