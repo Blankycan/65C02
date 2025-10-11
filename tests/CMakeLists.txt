@@ -8,12 +8,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(65C02_tests
-  test_cpu.cpp
-  test_memory_512Kb.cpp
-  test_cpu_with_memory.cpp
-  test_cpu_lda_instructions.cpp
-)
+file(GLOB_RECURSE TEST_SOURCES "*.cpp")
+add_executable(65C02_tests ${TEST_SOURCES})
 target_link_libraries(65C02_tests
   PRIVATE
   65C02_lib

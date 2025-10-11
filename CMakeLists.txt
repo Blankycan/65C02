@@ -24,10 +24,11 @@ endif()
 # ==============================
 #   Emulator Library
 # ==============================
-add_library(65C02_lib STATIC
-    src/cpu/cpu.cpp
-    src/memory/memory_512Kb.cpp
+file(GLOB_RECURSE LIB_SOURCES
+    "src/cpu/*.cpp"
+    "src/memory/*.cpp"
 )
+add_library(65C02_lib STATIC ${LIB_SOURCES})
 target_include_directories(65C02_lib PUBLIC src)
 
 # ==============================

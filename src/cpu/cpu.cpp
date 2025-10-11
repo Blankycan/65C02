@@ -1,12 +1,19 @@
 #include "cpu.h"
-#include "instructions.h"
 #include <cstdio>
+#include "instructions.h"
+#include "instructions/instruction_LDA.h"
 
 CPU::CPU() {
+  instructionHandlers.push_back(new InstructionLDA());
   reset();
 }
 
-CPU::~CPU() {}
+CPU::~CPU() {
+  for(InstructionHandler* instructionHandler : instructionHandlers) {
+    delete instructionHandler;
+  }
+  instructionHandlers.clear();
+}
 
 void CPU::reset() {
   pc = 0xFFFC;
@@ -38,16 +45,19 @@ int32_t CPU::execute(Memory512Kb& memory, uint32_t cyclesToExecute) {
 
   // While cycles executed is less than cycles to execute, fetch and execute the opcode
   while((cycles - cyclesStartAt) < cyclesToExecute) {
-    uint8_t opcode = fetch(memory);
+    Instruction opcode = (Instruction)fetch(memory);
 
-    switch ((Instruction)opcode) {
-      case Instruction::LDA_IMM:
-        a = fetch(memory);
-        updateStatusRegisterAfterLoadAccumulator();
+    bool instructionFound = false;
+    for(InstructionHandler* instructionHandler : instructionHandlers) {
+      if(instructionHandler->instructionIsSupported(opcode)) {
+        instructionHandler->execute(*this, memory, opcode);
+        instructionFound = true;
         break;
-      default:
-        printf("Unknown opcode: %d\n", opcode);
-        break;
+      }
+    }
+
+    if(!instructionFound) {
+      printf("Unknown opcode: %d\n", (int)opcode);
     }
   }
   return int32_t(cycles - cyclesStartAt) - cyclesToExecute;

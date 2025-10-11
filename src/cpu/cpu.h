@@ -1,6 +1,8 @@
 #pragma once
-#include "memory/memory_512Kb.h"
 #include <cstdint>
+#include <vector>
+#include "memory/memory_512Kb.h"
+#include "instructions/instruction_handler.h"
 
 struct StatusFlags {
   uint8_t C : 1;    // Carry Flag
@@ -49,5 +51,6 @@ public:
     StatusFlags flags;
   } sr;
 
+  std::vector<InstructionHandler*> instructionHandlers;
   uint32_t cycles;      // Cycles that have been executed since last reset
 };

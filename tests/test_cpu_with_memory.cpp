@@ -17,7 +17,7 @@ TEST_CASE("Execute one cycle will increment program counter", "[cpu]") {
   Memory512Kb memory;
   memory.write(0xFFFC, 0xFF); // Unknown opcode
 
-  cpu.execute(memory, 1);
+  REQUIRE(cpu.execute(memory, 1) == 0);
   REQUIRE(cpu.cycles == 1);
   REQUIRE(cpu.pc == 0xFFFD);
 }
@@ -30,7 +30,7 @@ TEST_CASE("Execute many cycles will increment program counter", "[cpu]") {
   memory.write(0xFFFE, 0xFF);
   memory.write(0xFFFF, 0xFF);
 
-  cpu.execute(memory, 4);
+  REQUIRE(cpu.execute(memory, 4) == 0);
   REQUIRE(cpu.cycles == 4);
   REQUIRE(cpu.pc == 0x0000);
 }
