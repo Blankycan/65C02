@@ -34,6 +34,8 @@ public:
   int32_t execute(Memory512Kb& memory, uint32_t cyclesToExecute);
 
   void updateStatusRegisterAfterLoadAccumulator();
+  void updateStatusRegisterAfterLoadXRegister();
+  void updateStatusRegisterAfterLoadYRegister();
 
   uint16_t PC;          // Program Counter
   uint16_t addressBus;  // Address Bus

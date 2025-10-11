@@ -2,9 +2,13 @@
 #include <cstdio>
 #include "instructions.h"
 #include "instructions/instruction_LDA.h"
+#include "instructions/instruction_LDX.h"
+#include "instructions/instruction_LDY.h"
 
 CPU::CPU() {
   instructionHandlers.push_back(new InstructionLDA());
+  instructionHandlers.push_back(new InstructionLDX());
+  instructionHandlers.push_back(new InstructionLDY());
   PC = 0xFFFC;
   SP = 0xFF;
   cycles = 0;
@@ -65,4 +69,18 @@ void CPU::updateStatusRegisterAfterLoadAccumulator() {
   P.flags.Z = (A == 0);
   // Set negative flag if accumulator is negative
   P.flags.N = (A & 0x80) ? 1 : 0;
+}
+
+void CPU::updateStatusRegisterAfterLoadXRegister() {
+  // Set zero flag if X register is zero
+  P.flags.Z = (X == 0);
+  // Set negative flag if X register is negative
+  P.flags.N = (X & 0x80) ? 1 : 0;
+}
+
+void CPU::updateStatusRegisterAfterLoadYRegister() {
+  // Set zero flag if Y register is zero
+  P.flags.Z = (Y == 0);
+  // Set negative flag if Y register is negative
+  P.flags.N = (Y & 0x80) ? 1 : 0;
 }
