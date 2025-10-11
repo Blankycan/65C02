@@ -7,19 +7,19 @@ struct StatusFlags {
   uint8_t I : 1;    // Interrupt Disable Flag
   uint8_t D : 1;    // Decimal Mode Flag
   uint8_t B : 1;    // Break Command Flag
-  uint8_t _ : 1;    // Unused
+  uint8_t _ : 1;    // Unused, pulled high by default
   uint8_t V : 1;    // Overflow Flag
   uint8_t N : 1;    // Negative Flag
 };
 
 /**
  65C02 CPU emulator.
- The 65C02 has a 16 bit address space (64K) arranged in 256 pages each of which is 256 bytes long.
- Page 0 ($0000-$00FF) has some special properties involving addressing modes and is very valuable memory.
- Page 1 ($0100-$01FF) is the stack.
- Bytes $FFFA-$FFFB are the NMIB interrupt vector.
- Bytes $FFFC-$FFFD are the reset vector.
- Bytes $FFFE-$FFFF are the IRQ/BRK vector.
+ The 65C02 has an 8-bit microprocessor.
+ It has an 8-bit data bus and 8-bit registers.
+ But its program counter and address bus is 16-bit allowing it to address 64KB of memory.
+ The program counter is always incremented by 1 when the CPU is not executing a branch instruction.
+ The address bus is used to address memory and the data bus is used to transfer data between the CPU and memory.
+ The data bus is also used to transfer data between the CPU and the registers.
  */
 class CPU {
 public:
@@ -29,6 +29,9 @@ public:
   void reset();
 
   uint16_t pc;          // Program Counter
+  uint16_t addressBus;  // Address Bus
+
+  uint8_t dataBus;      // Data Bus
   uint8_t sp;           // Stack Pointer (256 byte stack located between 0x0100 and 0x01FF)
   // Registers
   uint8_t a;            // Accumulator

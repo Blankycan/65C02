@@ -12,5 +12,5 @@ void CPU::reset() {
   a = 0;
   x = 0;
   y = 0;
-  sr.value = 0;
+  sr.value = 0b00100000;
 }
