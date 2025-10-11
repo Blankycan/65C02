@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "instructions.h"
 
 CPU::CPU() {
   reset();

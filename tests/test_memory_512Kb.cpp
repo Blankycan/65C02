@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "../src/memory_512Kb.h"
+#include "../src/memory/memory_512Kb.h"
 
 TEST_CASE("Memory reset", "[memory]") {
   Memory512Kb memory;

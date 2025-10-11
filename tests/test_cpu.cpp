@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "../src/cpu.h"
+#include "../src/cpu/cpu.h"
 
 TEST_CASE("CPU reset", "[cpu]") {
   // CPU start off with a reset
