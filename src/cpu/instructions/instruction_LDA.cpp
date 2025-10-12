@@ -9,7 +9,10 @@ InstructionLDA::InstructionLDA():
     Instruction::LDA_ZPX,
     Instruction::LDA_ABS,
     Instruction::LDA_ABX,
-    Instruction::LDA_ABY
+    Instruction::LDA_ABY,
+    Instruction::LDA_IDX,
+    Instruction::LDA_IDY,
+    Instruction::LDA_IDZ
   }) {}
 
 void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) {
@@ -44,7 +47,7 @@ void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
     }
     case Instruction::LDA_ABX: {
       uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
-      // Check if the absolute address is in the page boundary
+      // Check if the absolute address is crossing the page boundary, and hi byte changed
       if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.X) & 0xFF00)) {
         cpu.cycles++;
       }
@@ -56,12 +59,63 @@ void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
     }
     case Instruction::LDA_ABY: {
       uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
-      // Check if the absolute address is in the page boundary
+      // Check if the absolute address is crossing the page boundary, and hi byte changed
       if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.Y) & 0xFF00)) {
         cpu.cycles++;
       }
       absoluteAddress += cpu.Y;
       cpu.A = memory.read(absoluteAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_IDX: {
+      uint8_t zp = cpu.fetch(memory);
+      
+      // Increase the zero-page pointer by X (takes one cycle)
+      uint8_t lo = zp + cpu.X;
+      uint8_t hi = zp + cpu.X + 1;
+      cpu.cycles += 1;
+
+      uint16_t addr = memory.read(lo) | memory.read(hi) << 8;
+      cpu.cycles += 2;
+
+      cpu.A = memory.read(addr);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_IDY: {
+      uint8_t zp = cpu.fetch(memory);
+
+      // Fetch the zero page address
+      uint8_t lo = zp;
+      uint8_t hi = zp + 1;
+      uint16_t base = memory.read(lo) | memory.read(hi) << 8;
+      cpu.cycles += 2;
+
+      // Add Y to the read address
+      uint16_t addr = base + cpu.Y;
+
+      // Add cycle if page boundary is crossed, and hi byte changed
+      if((base & 0xFF00) != ((addr) & 0xFF00)) {
+        cpu.cycles++;
+      }
+
+      cpu.A = memory.read(addr);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_IDZ: {
+      uint8_t zp = cpu.fetch(memory);
+
+      uint8_t lo = zp;
+      uint8_t hi = zp + 1;
+      uint16_t addr = memory.read(lo) | memory.read(hi) << 8;
+      cpu.cycles += 2;
+
+      cpu.A = memory.read(addr);
       cpu.cycles++;
       cpu.updateStatusRegisterAfterLoadAccumulator();
       break;

@@ -43,7 +43,7 @@ void InstructionLDY::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
     }
     case Instruction::LDY_ABX: {
       uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
-      // Check if the absolute address is in the page boundary
+      // Check if the absolute address is crossing the page boundary, and hi byte changed
       if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.X) & 0xFF00)) {
         cpu.cycles++;
       }

@@ -9,6 +9,9 @@ enum class Instruction : uint8_t {
   LDA_ABS = 0xAD,    // Absolute, 3 bytes, 4 cycles
   LDA_ABX = 0xBD,    // Absolute, X, 3 bytes, 4 cycles (+1 if page boundary is crossed)
   LDA_ABY = 0xB9,    // Absolute, Y, 3 bytes, 4 cycles (+1 if page boundary is crossed)
+  LDA_IDX = 0xA1,    // Indirect, X, 2 bytes, 6 cycles
+  LDA_IDY = 0xB1,    // Indirect, Y, 2 bytes, 5 cycles (+1 if page boundary is crossed)
+  LDA_IDZ = 0xB2,    // Indirect, Zero Page, 2 bytes, 5 cycles (+1 if page boundary is crossed)
   // Load X Register
   LDX_IMM = 0xA2,    // Immediate, 2 bytes, 2 cycles
   LDX_ZP  = 0xA6,    // Zero Page, 2 bytes, 3 cycles

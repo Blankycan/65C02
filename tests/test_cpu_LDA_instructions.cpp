@@ -249,3 +249,180 @@ TEST_CASE("LDA absolute, Y will affect the zero and negative flags", "[cpu, lda,
   REQUIRE(cpu.P.flags.Z == 1);
   REQUIRE(cpu.P.flags.N == 0);
 }
+
+TEST_CASE("LDA indirect, X", "[cpu, lda, indirect, x]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDX);
+  memory.write(0xFFFD, 0x40);
+  cpu.X = 0x04;
+  memory.write(0x0044, 0x20);
+  memory.write(0x0045, 0x00);
+  memory.write(0x0020, 0xAB);
+
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0xAB);
+
+  // Test wrapping around with X
+  cpu.PC = 0xFFFC;
+  cpu.X = 0xFF;
+  memory.write(0x003F, 0x21);
+  memory.write(0x0040, 0x00);
+  memory.write(0x0021, 0xAC);
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0xAC);
+
+  // Test wrapping around reading from zero page
+  cpu.PC = 0xFFFC;
+  cpu.X = 0xBF;
+  // 0x40 + 0xBF => 0x00FF
+  memory.write(0x00FF, 0x30);
+  memory.write(0x0000, 0x00);
+  memory.write(0x0030, 0xAD);
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0xAD);
+}
+
+TEST_CASE("LDA indirect, X will affect the zero and negative flags", "[cpu, lda, indirect, x, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDX);
+  memory.write(0xFFFD, 0x00);
+  memory.write(0xFFFE, Instruction::LDA_IDX);
+  memory.write(0xFFFF, 0x0A);
+
+  // 0x00 + 0x0F
+  memory.write(0x000F, 0xCA);
+  memory.write(0x0010, 0x00);
+  memory.write(0x00CA, 0xFF);
+
+  // 0x0A + 0x21
+  memory.write(0x002B, 0xDE);
+  memory.write(0x002C, 0x00);
+  memory.write(0x00DE, 0x00);
+
+  cpu.X = 0x0F;
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0xFF);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+
+  cpu.X = 0x21;
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+}
+
+TEST_CASE("LDA indirect, Y", "[cpu, lda, indirect, y]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDY);
+  memory.write(0xFFFD, 0x40);
+  memory.write(0x0040, 0x20);
+  memory.write(0x0041, 0x00);
+  cpu.Y = 0x05;
+  // 0x0020 + 0x05
+  memory.write(0x0025, 0xAB);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xAB);
+
+  // Test reading outside of the page boundary
+  cpu.PC = 0xFFFC;
+  cpu.Y = 0xFF;
+  // 0x0020 + 0xFF => 0x011F
+  memory.write(0x011F, 0xAC);
+  REQUIRE(cpu.execute(memory, 6) == 0);
+  REQUIRE(cpu.A == 0xAC);
+
+  // Test wrapping around in the zero page
+  cpu.PC = 0xFFFC;
+  cpu.Y = 0x03;
+  memory.write(0xFFFD, 0xFF);
+  memory.write(0x00FF, 0x30);
+  memory.write(0x0000, 0x00);
+  memory.write(0x0033, 0xAD);
+  // 0x0030 + 0x03 => 0x0033
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xAD);
+}
+
+TEST_CASE("LDA indirect, Y will affect the zero and negative flags", "[cpu, lda, indirect, y, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDY);
+  memory.write(0xFFFD, 0x00);
+  memory.write(0xFFFE, Instruction::LDA_IDY);
+  memory.write(0xFFFF, 0x0A);
+
+  memory.write(0x0000, 0x00);
+  memory.write(0x0001, 0x00);
+
+  memory.write(0x000A, 0x10);
+  memory.write(0x000B, 0x00);
+
+  cpu.Y = 0x0F;
+  // 0x0000 + 0x0F => 0x000F
+  memory.write(0x000F, 0xCA);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xCA);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+
+  cpu.Y = 0x21;
+  // 0x0010 + 0x21 => 0x0031
+  memory.write(0x0031, 0x00);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+}
+
+TEST_CASE("LDA indirect, zero page", "[cpu, lda, indirect, zero_page]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDZ);
+  memory.write(0xFFFD, 0x40);
+  memory.write(0x0040, 0x48);
+  memory.write(0x0041, 0x20);
+  memory.write(0x2048, 0xAB);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xAB);
+
+  // Test wrapping around in the zero page
+  cpu.PC = 0xFFFC;
+  memory.write(0xFFFD, 0xFF);
+  memory.write(0x00FF, 0x30);
+  memory.write(0x0000, 0x40);
+  memory.write(0x4030, 0xAD);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xAD);
+}
+
+TEST_CASE("LDA indirect, zero page will affect the zero and negative flags", "[cpu, lda, indirect, zero_page, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_IDZ);
+  memory.write(0xFFFD, 0x00);
+  memory.write(0xFFFE, Instruction::LDA_IDZ);
+  memory.write(0xFFFF, 0x0A);
+
+  memory.write(0x0000, 0x00);
+  memory.write(0x0001, 0x00);
+
+  memory.write(0x000A, 0x10);
+  memory.write(0x000B, 0x00);
+  memory.write(0x0010, 0xAB);
+
+  // Reads from address 0x0000
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+
+  // Reads from address 0x0010
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0xAB);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+}
