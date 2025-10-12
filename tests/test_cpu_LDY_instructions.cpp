@@ -157,3 +157,49 @@ TEST_CASE("LDY absolute will affect the zero and negative flags", "[cpu, ldy, ab
   REQUIRE(cpu.P.flags.Z == 1);
   REQUIRE(cpu.P.flags.N == 0);
 }
+
+TEST_CASE("LDY absolute, X", "[cpu, ldy, absolute, x]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDY_ABX);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  cpu.X = 0x0F;
+  memory.write(0x0010, 0x32);
+
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.Y == 0x32);
+
+  // Test wrapping around
+  cpu.PC = 0xFFFC;
+  cpu.X = 0xFF;
+  memory.write(0x0100, 0x33);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.Y == 0x33);
+}
+
+TEST_CASE("LDY absolute, X will affect the zero and negative flags", "[cpu, ldy, absolute, x, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDY_ABX);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  memory.write(0xFFFF, Instruction::LDY_ABX);
+  memory.write(0x0000, 0x01);
+  memory.write(0x0001, 0x00);
+
+  memory.write(0x0010, 0xB2);
+  memory.write(0x0011, 0x00);
+
+  cpu.X = 0x0F;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.Y == 0xB2);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+
+  cpu.X = 0x10;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.Y == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+}

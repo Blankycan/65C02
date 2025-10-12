@@ -7,7 +7,9 @@ InstructionLDA::InstructionLDA():
     Instruction::LDA_IMM,
     Instruction::LDA_ZP,
     Instruction::LDA_ZPX,
-    Instruction::LDA_ABS
+    Instruction::LDA_ABS,
+    Instruction::LDA_ABX,
+    Instruction::LDA_ABY
   }) {}
 
 void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) {
@@ -35,6 +37,30 @@ void InstructionLDA::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
     case Instruction::LDA_ABS: {
       // Reads first low byte, then high byte
       uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
+      cpu.A = memory.read(absoluteAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_ABX: {
+      uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
+      // Check if the absolute address is in the page boundary
+      if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.X) & 0xFF00)) {
+        cpu.cycles++;
+      }
+      absoluteAddress += cpu.X;
+      cpu.A = memory.read(absoluteAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadAccumulator();
+      break;
+    }
+    case Instruction::LDA_ABY: {
+      uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
+      // Check if the absolute address is in the page boundary
+      if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.Y) & 0xFF00)) {
+        cpu.cycles++;
+      }
+      absoluteAddress += cpu.Y;
       cpu.A = memory.read(absoluteAddress);
       cpu.cycles++;
       cpu.updateStatusRegisterAfterLoadAccumulator();

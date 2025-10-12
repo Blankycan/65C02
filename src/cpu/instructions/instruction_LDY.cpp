@@ -7,7 +7,8 @@ InstructionLDY::InstructionLDY():
     Instruction::LDY_IMM,
     Instruction::LDY_ZP,
     Instruction::LDY_ZPX,
-    Instruction::LDY_ABS
+    Instruction::LDY_ABS,
+    Instruction::LDY_ABX
   }) {}
 
 void InstructionLDY::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) {
@@ -35,6 +36,18 @@ void InstructionLDY::execute(CPU& cpu, Memory512Kb& memory, Instruction opcode) 
     case Instruction::LDY_ABS: {
       // Reads first low byte, then high byte
       uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
+      cpu.Y = memory.read(absoluteAddress);
+      cpu.cycles++;
+      cpu.updateStatusRegisterAfterLoadYRegister();
+      break;
+    }
+    case Instruction::LDY_ABX: {
+      uint16_t absoluteAddress = cpu.fetch(memory) | cpu.fetch(memory) << 8;
+      // Check if the absolute address is in the page boundary
+      if((absoluteAddress & 0xFF00) != ((absoluteAddress + cpu.X) & 0xFF00)) {
+        cpu.cycles++;
+      }
+      absoluteAddress += cpu.X;
       cpu.Y = memory.read(absoluteAddress);
       cpu.cycles++;
       cpu.updateStatusRegisterAfterLoadYRegister();

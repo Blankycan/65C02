@@ -157,3 +157,95 @@ TEST_CASE("LDA absolute will affect the zero and negative flags", "[cpu, lda, ab
   REQUIRE(cpu.P.flags.Z == 1);
   REQUIRE(cpu.P.flags.N == 0);
 }
+
+TEST_CASE("LDA absolute, X", "[cpu, lda, absolute, x]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_ABX);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  cpu.X = 0x0F;
+  memory.write(0x0010, 0x32);
+
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0x32);
+
+  // Test wrapping around
+  cpu.PC = 0xFFFC;
+  cpu.X = 0xFF;
+  memory.write(0x0100, 0x33);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0x33);
+}
+
+TEST_CASE("LDA absolute, X will affect the zero and negative flags", "[cpu, lda, absolute, x, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_ABX);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  memory.write(0xFFFF, Instruction::LDA_ABX);
+  memory.write(0x0000, 0x01);
+  memory.write(0x0001, 0x00);
+
+  memory.write(0x0010, 0xB2);
+  memory.write(0x0011, 0x00);
+
+  cpu.X = 0x0F;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0xB2);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+
+  cpu.X = 0x10;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+}
+
+TEST_CASE("LDA absolute, Y", "[cpu, lda, absolute, y]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_ABY);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  cpu.Y = 0x0F;
+  memory.write(0x0010, 0x32);
+
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0x32);
+
+  // Test wrapping around
+  cpu.PC = 0xFFFC;
+  cpu.Y = 0xFF;
+  memory.write(0x0100, 0x33);
+  REQUIRE(cpu.execute(memory, 5) == 0);
+  REQUIRE(cpu.A == 0x33);
+}
+
+TEST_CASE("LDA absolute, Y will affect the zero and negative flags", "[cpu, lda, absolute, y, flags]") {
+  CPU cpu;
+  Memory512Kb memory;
+  memory.write(0xFFFC, Instruction::LDA_ABY);
+  memory.write(0xFFFD, 0x01);
+  memory.write(0xFFFE, 0x00);
+  memory.write(0xFFFF, Instruction::LDA_ABY);
+  memory.write(0x0000, 0x01);
+  memory.write(0x0001, 0x00);
+  
+  memory.write(0x0010, 0xB2);
+  memory.write(0x0011, 0x00);
+
+  cpu.Y = 0x0F;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0xB2);
+  REQUIRE(cpu.P.flags.Z == 0);
+  REQUIRE(cpu.P.flags.N == 1);
+
+  cpu.Y = 0x10;
+  REQUIRE(cpu.execute(memory, 4) == 0);
+  REQUIRE(cpu.A == 0x00);
+  REQUIRE(cpu.P.flags.Z == 1);
+  REQUIRE(cpu.P.flags.N == 0);
+}
