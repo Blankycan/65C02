@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <vector>
 #include "../instructions.h"
 #include "../../memory/memory_512Kb.h"
